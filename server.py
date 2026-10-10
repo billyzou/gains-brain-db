@@ -21,6 +21,12 @@ DATA = os.path.join(HERE, "data.json")
 SEED = os.path.join(HERE, "seed.json")
 CAL_URL = os.path.join(HERE, "calendar_url.txt")
 WORKOUT_TITLE = re.compile(r"^billy (lifting|muay thai)\b", re.I)
+STATIC = {  # files besides index.html the page can load, with their content types
+    "/manifest.webmanifest": "application/manifest+json",
+    "/icon-180.png": "image/png",
+    "/icon-192.png": "image/png",
+    "/icon-512.png": "image/png",
+}
 _cache = {"body": None}  # last good result, used if Google can't be reached
 
 
@@ -48,6 +54,13 @@ class Handler(SimpleHTTPRequestHandler):
         elif self.path in ("/", "/index.html"):
             self.path = "/index.html"
             super().do_GET()
+        elif self.path in STATIC:
+            with open(os.path.join(HERE, self.path.lstrip("/")), "rb") as f:
+                body = f.read()
+            self.send_response(200)
+            self.send_header("Content-Type", STATIC[self.path])
+            self.end_headers()
+            self.wfile.write(body)
         else:
             self.send_error(404)
 
