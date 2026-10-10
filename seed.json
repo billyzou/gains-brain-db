@@ -1,0 +1,232 @@
+{
+ "week": "A",
+ "days": [
+  {
+   "day": "Sun",
+   "note": "",
+   "A": [
+    {
+     "name": "Deficit Pushups",
+     "reps": "8-12",
+     "weight": "17.5",
+     "sets": [
+      "9",
+      "9"
+     ]
+    },
+    {
+     "name": "Trap Bar DL",
+     "reps": "5-8",
+     "weight": "85",
+     "sets": [
+      "6",
+      ""
+     ]
+    },
+    {
+     "name": "Pull-Ups",
+     "reps": "6-10",
+     "weight": "0",
+     "sets": [
+      "10",
+      "7"
+     ]
+    },
+    {
+     "name": "Lateral Raise",
+     "reps": "8-12",
+     "weight": "1.25",
+     "sets": [
+      "9.5",
+      "9.5"
+     ]
+    },
+    {
+     "name": "Wrist Curls",
+     "reps": "8-12",
+     "weight": "15",
+     "sets": [
+      "",
+      ""
+     ]
+    }
+   ],
+   "B": [
+    {
+     "name": "Dips",
+     "reps": "8-10",
+     "weight": "7.5",
+     "sets": [
+      "10",
+      "10"
+     ]
+    },
+    {
+     "name": "Trap Bar RDL",
+     "reps": "6-8",
+     "weight": "65",
+     "sets": [
+      "6",
+      "7"
+     ]
+    },
+    {
+     "name": "Lat Pulldown",
+     "reps": "8-12",
+     "weight": "47.5",
+     "sets": [
+      "10",
+      "9"
+     ]
+    },
+    {
+     "name": "Dumbbell Lateral Raise",
+     "reps": "8-12",
+     "weight": "10",
+     "sets": [
+      "8",
+      "8"
+     ]
+    },
+    {
+     "name": "Wrist Curls",
+     "reps": "8-12",
+     "weight": "15",
+     "sets": [
+      "",
+      ""
+     ]
+    }
+   ]
+  },
+  {
+   "day": "Mon",
+   "note": "Rest",
+   "A": [],
+   "B": []
+  },
+  {
+   "day": "Tue",
+   "note": "",
+   "A": [
+    {
+     "name": "Belt Squats",
+     "reps": "6-10",
+     "weight": "95",
+     "sets": [
+      "9",
+      "9"
+     ]
+    },
+    {
+     "name": "Seated Row",
+     "reps": "8-12",
+     "weight": "52.5",
+     "sets": [
+      "10",
+      "10"
+     ]
+    },
+    {
+     "name": "Incline Bench Press",
+     "reps": "8-12",
+     "weight": "40",
+     "sets": [
+      "9",
+      "8"
+     ]
+    },
+    {
+     "name": "Kettlebell Swing",
+     "reps": "15-20",
+     "weight": "L3",
+     "sets": [
+      "",
+      ""
+     ]
+    },
+    {
+     "name": "Wrist Curls",
+     "reps": "8-12",
+     "weight": "15",
+     "sets": [
+      "",
+      ""
+     ]
+    }
+   ],
+   "B": [
+    {
+     "name": "Bulgarian Split Squats",
+     "reps": "8-12",
+     "weight": "55",
+     "sets": [
+      "8",
+      "8"
+     ]
+    },
+    {
+     "name": "Wide Grip Seated Row",
+     "reps": "8-12",
+     "weight": "52.5",
+     "sets": [
+      "12",
+      "12"
+     ]
+    },
+    {
+     "name": "Bench Press",
+     "reps": "6-10",
+     "weight": "57.5",
+     "sets": [
+      "",
+      ""
+     ]
+    },
+    {
+     "name": "Kettlebell Swing",
+     "reps": "15-20",
+     "weight": "L3",
+     "sets": [
+      "",
+      ""
+     ]
+    },
+    {
+     "name": "Wrist Curls",
+     "reps": "8-12",
+     "weight": "15",
+     "sets": [
+      "",
+      ""
+     ]
+    }
+   ]
+  },
+  {
+   "day": "Wed",
+   "note": "Rest",
+   "A": [],
+   "B": []
+  },
+  {
+   "day": "Thu",
+   "note": "Muay Thai Pads",
+   "A": [],
+   "B": []
+  },
+  {
+   "day": "Fri",
+   "note": "Rest",
+   "A": [],
+   "B": []
+  },
+  {
+   "day": "Sat",
+   "note": "Muay Thai Pads",
+   "A": [],
+   "B": []
+  }
+ ],
+ "log": []
+}

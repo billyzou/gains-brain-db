@@ -1,0 +1,539 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Gains Brain">
+<title>Gains Brain</title>
+<style>
+  :root {
+    --bg: #f4f4f1; --card: #fff; --text: #1b1b1a; --muted: #77756f; --line: #e3e1db;
+    --accent: #2f6fde; --accent-text: #fff; --danger: #c8412f; --chip: #eae8e2;
+    --done: #2e9d5b; --done-soft: #dff1e5;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #121212; --card: #1d1d1c; --text: #ecebe7; --muted: #9a988f; --line: #2e2d2b;
+      --accent: #5b8ff0; --accent-text: #0b0b0b; --danger: #ef6b58; --chip: #2a2a28;
+      --done: #4cc47e; --done-soft: #1d3426;
+    }
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 16px/1.35 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    padding: env(safe-area-inset-top) 0 calc(80px + env(safe-area-inset-bottom));
+  }
+  header {
+    position: sticky; top: 0; z-index: 2; background: var(--bg);
+    padding: 12px 16px 8px; border-bottom: 1px solid var(--line);
+  }
+  .row { display: flex; align-items: center; gap: 8px; }
+  h1 { font-size: 22px; margin: 0; white-space: nowrap; }
+  #status { flex: 1; min-width: 0; text-align: right; font-size: 12px; color: var(--muted);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .seg { display: flex; background: var(--chip); border-radius: 10px; padding: 3px; }
+  .seg button { border: 0; background: none; color: var(--text); font: inherit; font-weight: 600;
+    padding: 6px 14px; border-radius: 8px; }
+  .seg button.on { background: var(--accent); color: var(--accent-text); }
+  #days { display: flex; gap: 6px; margin-top: 10px; overflow-x: auto; }
+  #days button { flex: 1; min-width: 44px; border: 0; background: var(--chip); color: var(--text);
+    font: inherit; font-size: 14px; padding: 8px 0; border-radius: 10px; position: relative; }
+  #days button.on { background: var(--text); color: var(--bg); font-weight: 600; }
+  #days button.today::after { content: ""; position: absolute; bottom: 3px; left: 50%;
+    width: 4px; height: 4px; margin-left: -2px; border-radius: 50%; background: var(--accent); }
+  #weeknav { margin-top: 10px; }
+  #weeklabel { flex: 1; border: 0; background: none; color: var(--text); font: inherit; font-weight: 600; }
+  body.cal #days, body.cal #weeknav, body.cal #week, body.cal #edit { display: none; }
+  main { padding: 12px 16px; display: grid; gap: 12px; }
+  .date { font-size: 14px; color: var(--muted); font-weight: 600; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
+  .note { font-size: 20px; padding: 24px 14px; color: var(--muted); justify-content: center; }
+  .name { font-weight: 650; font-size: 17px; }
+  .reps { color: var(--muted); font-size: 14px; margin-left: 4px; font-weight: 400; }
+  .label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em;
+    margin: 12px 0 6px; }
+  input { font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--line);
+    border-radius: 10px; padding: 10px; width: 100%; min-width: 0; }
+  input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+  .weight input { text-align: center; font-size: 20px; font-weight: 600; }
+  .step { flex: none; width: 48px; height: 48px; border: 0; border-radius: 12px; background: var(--chip);
+    color: var(--text); font-size: 24px; }
+  .sets { display: flex; gap: 8px; flex-wrap: wrap; }
+  .sets input { width: 64px; text-align: center; font-size: 18px; }
+  .addset { width: 48px; border: 1px dashed var(--line); background: none; color: var(--muted);
+    border-radius: 10px; font-size: 20px; }
+  .prev { margin-top: 10px; font-size: 13px; color: var(--muted); }
+  .check { flex: none; width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--line);
+    background: none; color: transparent; font-size: 20px; font-weight: 700; }
+  .check.on { background: var(--done); border-color: var(--done); color: #fff; }
+  .edit-only { display: none; }
+  body.editing .edit-only { display: flex; }
+  body.editing .view-only { display: none; }
+  .tools { gap: 6px; margin-top: 10px; }
+  .tools button, .btn { border: 1px solid var(--line); background: var(--card); color: var(--text);
+    font: inherit; font-size: 14px; padding: 8px 12px; border-radius: 10px; }
+  .tools .del { color: var(--danger); margin-left: auto; }
+  .btn.small { font-size: 13px; padding: 4px 10px; }
+  .btn:disabled { opacity: .3; }
+  .btn.del { color: var(--danger); }
+  .btn.primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+  .section { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em;
+    color: var(--muted); margin-top: 8px; }
+  .log { display: grid; gap: 12px; }
+  .log .entry { gap: 12px; }
+  .sub { font-size: 14px; color: var(--muted); }
+  .empty { color: var(--muted); font-size: 14px; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
+  .cal-grid .dow { font-size: 12px; color: var(--muted); padding-bottom: 4px; }
+  .cal-grid button { aspect-ratio: 1; border: 0; border-radius: 10px; background: none; color: var(--text);
+    font: inherit; font-size: 15px; position: relative; }
+  .cal-grid button.has { background: var(--done-soft); color: var(--done); font-weight: 700; }
+  .cal-grid button.today { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .cal-grid button.sel { background: var(--text); color: var(--bg); }
+  .cal-grid button.future { color: var(--muted); }
+  .cal-grid button.plan::after { content: ""; position: absolute; bottom: 5px; left: 50%; width: 5px; height: 5px;
+    margin-left: -2.5px; border-radius: 50%; background: var(--accent); }
+  .month { font-size: 18px; font-weight: 650; flex: 1; text-align: center; }
+  footer { position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg);
+    border-top: 1px solid var(--line); padding: 8px 16px calc(8px + env(safe-area-inset-bottom)); }
+  footer button { flex: 1; border: 0; background: none; color: var(--muted); font: inherit;
+    font-weight: 600; padding: 10px; border-radius: 10px; }
+  footer button.on { background: var(--chip); color: var(--text); }
+</style>
+</head>
+<body>
+<header>
+  <div class="row">
+    <h1>Gains Brain</h1>
+    <span id="status"></span>
+    <button class="btn" id="refresh" aria-label="Refresh from calendar">↻</button>
+    <button class="btn" id="edit">Edit</button>
+    <div class="seg" id="week">
+      <button data-w="A">A</button><button data-w="B">B</button>
+    </div>
+  </div>
+  <div class="row" id="weeknav">
+    <button class="btn" data-d="-1" aria-label="Previous week">‹</button>
+    <button id="weeklabel"></button>
+    <button class="btn" data-d="1" aria-label="Next week">›</button>
+  </div>
+  <div id="days"></div>
+</header>
+<main id="main"></main>
+<footer>
+  <div class="row" id="tabs">
+    <button data-v="plan">Today</button><button data-v="cal">Calendar</button>
+  </div>
+</footer>
+
+<script>
+const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const iso = (d) => d.toLocaleDateString("en-CA"); // YYYY-MM-DD in local time
+const parse = (s) => new Date(s + "T00:00:00");
+const fmt = (s, o) => parse(s).toLocaleDateString(undefined, o);
+const today = new Date(); today.setHours(0, 0, 0, 0);
+const todayStr = iso(today);
+let data, dayIdx = today.getDay(), weekOffset = 0, view = "plan", editing = false, saveTimer;
+let sched = { moves: [], cancels: [] }, schedErr = "";
+let calMonth = new Date(today.getFullYear(), today.getMonth(), 1), calSel = todayStr;
+
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const status = (t) => ($("#status").textContent = t);
+// A date's log: what you checked off, plus Muay Thai sessions counted automatically.
+const logFor = (date) => {
+  const entries = data.log.filter((e) => e.date === date);
+  return entries.concat(autoEntries(date).filter((a) => !entries.some((e) => e.name === a.name)));
+};
+const isAuto = (name) => /muay thai/i.test(name);
+const skipped = (date, name) => (data.skips[date] || []).includes(name);
+// Muay Thai sessions planned on a date count as done once the day arrives, unless unchecked.
+function autoEntries(date) {
+  if (date > todayStr || date < START) return [];
+  return plansFor(date, false).map(({ t }) => data.days[t].note)
+    .filter((note) => note && isAuto(note) && !skipped(date, note))
+    .map((name) => ({ date, name, auto: true }));
+}
+// Date of the selected day tab within the current Sun–Sat week.
+// Date of the selected day tab within the viewed Sun–Sat week (weekOffset 0 = this week).
+const weekStart = () => { const d = new Date(today); d.setDate(d.getDate() - today.getDay() + 7 * weekOffset); return d; };
+const curDate = () => { const d = weekStart(); d.setDate(d.getDate() + dayIdx); return iso(d); };
+const flip = (w) => (w === "A" ? "B" : "A");
+const START = "2026-10-01"; // tracking starts here: nothing can be logged or planned before it
+const sow = (d) => { const x = new Date(d); x.setDate(x.getDate() - x.getDay()); return x; }; // start of week
+const minOffset = Math.round((sow(parse(START)) - sow(today)) / 6048e5); // earliest week the Today tab can show
+const exsOf = (t, w = data.week) => data.days[t][w];
+// A/B for any date, assuming the weeks alternate starting from the current week's choice.
+function weekOf(date) {
+  const weeks = Math.round((sow(parse(date)) - sow(today)) / 6048e5);
+  return weeks % 2 === 0 ? data.week : flip(data.week);
+}
+const hasSession = (t, w) => exsOf(t, w).length || (data.days[t].note && !isRest(data.days[t].note));
+const isRest = (note) => /^rest$/i.test(note.trim());
+const noTime = (text) => text.replace(/\s*\b\d{1,2}(:\d{2})?\s*(am|pm)\b/gi, "").trim(); // "Muay Thai Pads 11am" → "Muay Thai Pads"
+
+// Which plans land on a date, as {t: default weekday, w: "A"/"B"}, after moves/deletions in
+// Google Calendar. A moved workout keeps the week letter of the day it came from.
+// Edit mode always shows the default plan for the selected weekday.
+function plansFor(date, forEdit = editing) {
+  const wd = parse(date).getDay();
+  if (forEdit) return [{ t: wd, w: weekOf(date) }];
+  let ps = [{ t: wd, w: weekOf(date) }].filter(({ t }) => !sched.moves.some((m) => m.from === date && m.day === t)
+    && !sched.cancels.some((c) => c.date === date && c.day === t));
+  for (const m of sched.moves) if (m.to === date) ps.push({ t: m.day, w: weekOf(m.from) });
+  // Drop a "Rest" placeholder when a workout was moved onto this day.
+  if (ps.length > 1) ps = ps.filter(({ t, w }) => hasSession(t, w));
+  return ps;
+}
+
+async function loadSchedule() {
+  try {
+    const s = await (await fetch("/api/schedule", { cache: "no-store" })).json();
+    if (s.ok) { sched = s; schedErr = ""; } else schedErr = s.error;
+  } catch { schedErr = "couldn't reach server"; }
+}
+
+async function load() {
+  try {
+    const r = await fetch("/api/data", { cache: "no-store" });
+    data = await r.json();
+  } catch {
+    data = JSON.parse(localStorage.getItem("gains-brain-cache") || "null");
+    status(data ? "offline" : "can't reach server");
+    if (!data) return;
+  }
+  data.log = data.log || [];
+  data.extras = data.extras || {}; // one-off exercises added for a single date
+  data.drafts = data.drafts || {}; // per-date edits to planned cards, until checked off
+  data.skips = data.skips || {}; // Muay Thai sessions you unchecked, by date
+  await loadSchedule();
+  localStorage.setItem("gains-brain-cache", JSON.stringify(data));
+  render();
+}
+
+function save() {
+  status("saving…");
+  localStorage.setItem("gains-brain-cache", JSON.stringify(data));
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async () => {
+    try {
+      const r = await fetch("/api/data", { method: "PUT", body: JSON.stringify(data) });
+      status(r.ok ? "saved" : "save failed");
+    } catch { status("offline — not saved"); }
+  }, 500);
+}
+
+// Most recent logged entry (by date) for an exercise before a date.
+function prevEntry(name, before) {
+  let best;
+  for (const e of data.log) if (e.name === name && e.weight !== undefined && e.date < before && (!best || e.date >= best.date)) best = e;
+  return best;
+}
+
+// What a planned card shows on a date: that day's unsaved edits, else the last logged
+// numbers before that day, else the default plan's numbers.
+function shown(ex, date) {
+  const d = data.drafts[date]?.[ex.name];
+  if (d) return { name: ex.name, ...d };
+  const p = prevEntry(ex.name, date);
+  if (!p) return ex;
+  const sets = [...p.sets];
+  while (sets.length < ex.sets.length) sets.push("");
+  return { name: ex.name, weight: p.weight, sets };
+}
+
+const detail = (e) => [e.weight, (e.sets || []).filter(Boolean).join(", ")].filter(Boolean).join(" × ");
+
+// Log list for a date: tap the check to undo, plus a box for anything unplanned.
+function logSection(date) {
+  const entries = logFor(date);
+  return `<div class="log">
+    ${entries.map((e) => `<div class="card row entry">
+      <button class="check on" data-act="unlog" data-k="${data.log.indexOf(e)}" data-date="${e.date}" data-name="${esc(e.name)}" aria-label="Undo">✓</button>
+      <div><div class="name">${esc(noTime(e.name))}</div>${detail(e) ? `<div class="sub">${esc(detail(e))}</div>` : ""}</div>
+    </div>`).join("") || `<div class="empty">Nothing logged yet.</div>`}
+  </div>`;
+}
+
+function render() {
+  document.body.classList.toggle("editing", editing);
+  document.body.classList.toggle("cal", view === "cal");
+  $("#edit").textContent = editing ? "Done" : "Edit";
+  $("#edit").classList.toggle("primary", editing);
+  document.querySelectorAll("#tabs button").forEach((b) => b.classList.toggle("on", b.dataset.v === view));
+  document.querySelectorAll("#week button").forEach((b) => b.classList.toggle("on", b.dataset.w === weekOf(curDate())));
+  const startLabel = weekStart().toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  $('#weeknav [data-d="1"]').disabled = weekOffset >= 0;
+  $('#weeknav [data-d="-1"]').disabled = weekOffset <= minOffset;
+  $("#weeklabel").textContent = weekOffset ? `Week of ${startLabel}` : `This week · ${startLabel}`;
+  $("#days").innerHTML = DAYS.map((d, i) =>
+    `<button data-i="${i}" class="${i === dayIdx ? "on" : ""} ${!weekOffset && i === today.getDay() ? "today" : ""}">${d}</button>`).join("");
+  $("#main").innerHTML = view === "cal" ? renderCal() : renderPlan();
+}
+
+// Calendar status plus "moved to …" / "removed" notes for a date.
+function calNotes(date) {
+  const short = { weekday: "short", month: "short", day: "numeric" };
+  let html = schedErr ? `<div class="empty">Calendar: ${esc(schedErr)}. Showing your default schedule.</div>` : "";
+  for (const m of sched.moves.filter((m) => m.from === date)) html += `<div class="empty">📅 ${esc(m.title)} moved to ${fmt(m.to, short)}</div>`;
+  for (const c of sched.cancels.filter((c) => c.date === date)) html += `<div class="empty">📅 ${esc(c.title)} removed from the calendar</div>`;
+  return html;
+}
+
+// Weight, reps-per-set and "Last" lines shared by planned and one-off exercise cards.
+// `aside` goes at the right end of the "Reps per set" line (used for one-off cards' Remove button).
+function exBody(ex, date, aside = "") {
+  const p = ex.name && prevEntry(ex.name, date);
+  return `<div class="label">Weight</div>
+    <div class="row weight">
+      <button class="step" data-step="-2.5">−</button>
+      <input data-f="weight" value="${esc(ex.weight)}" inputmode="decimal">
+      <button class="step" data-step="2.5">+</button>
+    </div>
+    <div class="row" style="margin:12px 0 6px"><div class="label" style="margin:0;flex:1">Reps per set</div>${aside}</div>
+    <div class="sets">
+      ${ex.sets.map((s, j) => `<input data-f="set" data-j="${j}" value="${esc(s)}" inputmode="decimal">`).join("")}
+      <button class="addset" data-act="addset">+</button>
+    </div>
+    ${p ? `<div class="prev">Last (${fmt(p.date, { month: "short", day: "numeric" })}): ${esc(detail(p) || "—")}</div>` : ""}`;
+}
+
+function renderPlan() {
+  const date = curDate(), ps = plansFor(date);
+  const logged = new Set(logFor(date).map((e) => e.name));
+  let html = `<div class="date">${editing ? `Editing your default ${fmt(date, { weekday: "long" })} plan`
+    : fmt(date, { weekday: "long", month: "short", day: "numeric" })}</div>`;
+  if (!editing && date < START) return html + `<div class="card note row">Before tracking started (Oct 1)</div>`;
+  if (!editing) {
+    html += calNotes(date);
+    if (!ps.length) html += `<div class="card note row">Nothing planned</div>`;
+  }
+
+  for (const { t, w } of ps) {
+    const day = data.days[t], exs = exsOf(t, w);
+    const todo = exs.map((ex, i) => ({ ex, i })).filter(({ ex }) => editing || !logged.has(ex.name));
+    if (t !== dayIdx) html += `<div class="section">${DAYS[t]}'s workout${exs.length && w !== weekOf(date) ? ` (Week ${w})` : ""} · moved here in calendar</div>`;
+    html += `<div class="card edit-only" data-t="${t}" style="flex-direction:column">
+        <div class="label" style="margin-top:0">Day note (e.g. Rest, Muay Thai)</div>
+        <input data-f="note" value="${esc(day.note)}" placeholder="Optional"></div>`;
+    if (!editing && day.note && !logged.has(day.note)) {
+      html += `<div class="card row ${exs.length ? "" : "note"}" data-t="${t}">
+        ${!isRest(day.note) ? `<button class="check" data-act="checknote" aria-label="Done">✓</button>` : ""}
+        <div style="${exs.length ? "color:var(--muted)" : ""}">${esc(noTime(day.note))}</div></div>`;
+    }
+    if (!editing && !day.note && !exs.length) html += `<div class="card note row">Nothing planned</div>`;
+    if (!editing && exs.length && !todo.length) html += `<div class="empty">All planned exercises done 💪</div>`;
+
+    html += todo.map(({ ex, i }) => {
+      return `<div class="card" data-t="${t}" data-w="${w}" data-i="${i}">
+        <div class="view-only row">
+          <button class="check" data-act="check" aria-label="Done">✓</button>
+          <div><span class="name">${esc(ex.name)}</span><span class="reps">${esc(ex.reps)} reps</span></div>
+        </div>
+        <div class="edit-only row">
+          <input data-f="name" value="${esc(ex.name)}" placeholder="Exercise">
+          <input data-f="reps" value="${esc(ex.reps)}" placeholder="8-12" style="width:84px;flex:none">
+        </div>
+        ${exBody(editing ? ex : shown(ex, date), date)}
+        <div class="edit-only row tools">
+          <button data-act="up">↑</button><button data-act="down">↓</button>
+          <button data-act="rmset">− set</button>
+          <button class="del" data-act="del">Delete</button>
+        </div>
+      </div>`;
+    }).join("");
+  }
+
+  if (editing) html += `<button class="btn" data-act="add" data-t="${dayIdx}" data-w="${weekOf(date)}">+ Exercise</button>`;
+  else {
+    html += (data.extras[date] || []).map((ex, i) => ex.name && logged.has(ex.name) ? "" : `<div class="card" data-x="${date}" data-i="${i}">
+        <div class="row">
+          <button class="check" data-act="check" aria-label="Done">✓</button>
+          <input data-f="name" value="${esc(ex.name)}" placeholder="Exercise name">
+        </div>
+        ${exBody(ex, date, `<button class="btn small del" data-act="rmextra">Remove</button>`)}
+      </div>`).join("");
+    html += `<button class="btn" data-act="addextra">+ Add exercise</button>`;
+    html += `<div class="section">Log</div>` + logSection(date);
+  }
+  return html;
+}
+
+function renderCal() {
+  const y = calMonth.getFullYear(), m = calMonth.getMonth();
+  const counts = {};
+  let cells = DAYS.map((d) => `<div class="dow">${d[0]}</div>`).join("");
+  cells += "<div></div>".repeat(new Date(y, m, 1).getDay());
+  for (let d = 1, n = new Date(y, m + 1, 0).getDate(); d <= n; d++) {
+    const s = iso(new Date(y, m, d));
+    counts[s] = logFor(s).length;
+    const planned = s >= START && plansFor(s).some(({ t, w }) => hasSession(t, w));
+    const cls = [counts[s] && "has", planned && "plan", s === todayStr && "today", s === calSel && "sel", s > todayStr && "future"].filter(Boolean).join(" ");
+    cells += `<button class="${cls}" data-act="cal" data-date="${s}">${d}</button>`;
+  }
+  return `<div class="card">
+      <div class="row" style="margin-bottom:10px">
+        <button class="btn" data-act="month" data-d="-1" aria-label="Previous month" ${iso(calMonth) <= START ? "disabled" : ""}>‹</button>
+        <div class="month">${calMonth.toLocaleDateString(undefined, { month: "long", year: "numeric" })}</div>
+        <button class="btn" data-act="month" data-d="1" aria-label="Next month">›</button>
+      </div>
+      <div class="cal-grid">${cells}</div>
+    </div>
+    <div class="date">${fmt(calSel, { weekday: "long", month: "short", day: "numeric", year: "numeric" })}</div>
+    ${calNotes(calSel)}
+    ${plannedSection(calSel)}
+    <div class="section">Log</div>
+    ${logSection(calSel)}`;
+}
+
+function plannedSection(date) {
+  const wd = parse(date).getDay();
+  const rows = plansFor(date).filter(({ t, w }) => hasSession(t, w)).map(({ t, w }) => {
+    const exs = exsOf(t, w);
+    return `<div>
+      <div class="name">${exs.length ? `Lifting · Week ${w}` : esc(noTime(data.days[t].note))}${t !== wd ? `<span class="reps">${DAYS[t]}'s, moved here</span>` : ""}</div>
+      ${exs.length ? `<div class="sub">${esc(exs.map((e) => e.name).join(" · "))}</div>` : ""}
+    </div>`;
+  }).join("");
+  return `<div class="section">Planned</div>
+    <div class="card" style="display:grid;gap:10px">${rows || `<div class="empty">Rest day</div>`}</div>`;
+}
+
+const listOf = (card) => card.dataset.x ? data.extras[card.dataset.x] : exsOf(+card.dataset.t, card.dataset.w);
+function valuesFor(card) {
+  const ex = listOf(card)[+card.dataset.i];
+  if (card.dataset.x || editing) return ex;
+  const date = curDate(), drafts = (data.drafts[date] = data.drafts[date] || {});
+  if (!drafts[ex.name]) { const v = shown(ex, date); drafts[ex.name] = { weight: v.weight, sets: [...v.sets] }; }
+  return drafts[ex.name];
+}
+function clearDraft(date, name) {
+  if (!data.drafts[date]) return;
+  delete data.drafts[date][name];
+  if (!Object.keys(data.drafts[date]).length) delete data.drafts[date];
+}
+
+// Typing: update data in place without re-rendering, so the keyboard stays open.
+$("#main").addEventListener("input", (e) => {
+  const f = e.target.dataset.f;
+  if (!f) return;
+  const card = e.target.closest(".card");
+  if (f === "note") { data.days[+card.dataset.t].note = e.target.value; return save(); }
+  if (f === "name" || f === "reps") listOf(card)[+card.dataset.i][f] = e.target.value;
+  else if (f === "set") valuesFor(card).sets[+e.target.dataset.j] = e.target.value;
+  else valuesFor(card)[f] = e.target.value;
+  save();
+});
+
+// Naming a one-off exercise you've logged before fills in its last weight and reps, if still blank.
+$("#main").addEventListener("change", (e) => {
+  const card = e.target.closest(".card[data-x]");
+  if (!card || e.target.dataset.f !== "name") return;
+  const ex = listOf(card)[+card.dataset.i], p = prevEntry(ex.name.trim(), card.dataset.x);
+  if (!p || ex.weight || ex.sets.some(Boolean)) return;
+  ex.weight = p.weight;
+  ex.sets = [...p.sets];
+  while (ex.sets.length < 2) ex.sets.push("");
+  save(); render();
+});
+
+$("#main").addEventListener("click", (e) => {
+  const b = e.target.closest("button");
+  if (!b) return;
+  const act = b.dataset.act;
+  if (act === "unlog") {
+    const { date, name } = b.dataset;
+    if (isAuto(name)) (data.skips[date] = data.skips[date] || []).push(name); // stays unchecked
+    if (+b.dataset.k < 0) { save(); return render(); } // automatic entry, nothing to remove
+    const [e] = data.log.splice(+b.dataset.k, 1);
+    if (e.weight !== undefined) (data.drafts[e.date] = data.drafts[e.date] || {})[e.name] = { weight: e.weight, sets: [...e.sets, ...(e.sets.length < 2 ? ["", ""].slice(e.sets.length) : [])] };
+    save(); return render();
+  }
+  if (act === "cal") { calSel = b.dataset.date; return render(); }
+  if (act === "month") {
+    const next = new Date(calMonth.getFullYear(), calMonth.getMonth() + +b.dataset.d, 1);
+    if (iso(next) >= START.slice(0, 8) + "01") calMonth = next; // not before the start month
+    return render();
+  }
+  if (act === "checknote") {
+    const date = curDate(), name = data.days[+b.closest("[data-t]").dataset.t].note;
+    if (skipped(date, name)) data.skips[date] = data.skips[date].filter((n) => n !== name); // re-check
+    else data.log.push({ date, name });
+    save(); return render();
+  }
+  if (act === "add") {
+    exsOf(+b.dataset.t, b.dataset.w).push({ name: "", reps: "8-12", weight: "0", sets: ["", ""] });
+    save(); render();
+    return [...document.querySelectorAll("#main input[data-f=name]")].pop().focus();
+  }
+
+  if (act === "addextra") {
+    const date = curDate();
+    (data.extras[date] = data.extras[date] || []).push({ name: "", weight: "", sets: ["", ""] });
+    save(); render();
+    return [...document.querySelectorAll(`.card[data-x="${date}"] input[data-f=name]`)].pop().focus();
+  }
+
+  const card = b.closest(".card[data-i]");
+  if (!card) return;
+  const w = card.dataset.w, i = +card.dataset.i, exs = listOf(card), ex = exs[i];
+  if (b.dataset.step) {
+    // Adjust the leading number, keep any suffix like "paused".
+    const v = valuesFor(card), m = v.weight.match(/^\s*(-?\d*\.?\d+)(.*)$/);
+    const n = Math.max(0, (m ? +m[1] : 0) + +b.dataset.step);
+    v.weight = String(+n.toFixed(2)) + (m ? m[2] : "");
+    b.parentElement.querySelector("input").value = v.weight;
+    return save();
+  }
+  if (act === "check") {
+    if (!ex.name.trim()) return card.querySelector("input[data-f=name]").focus(); // one-off needs a name first
+    // Snapshot what was actually done; later plan edits don't change the log.
+    const v = card.dataset.x ? ex : shown(ex, curDate());
+    data.log.push({ date: curDate(), week: w, name: ex.name.trim(), weight: v.weight, sets: v.sets.filter(Boolean) });
+    clearDraft(curDate(), ex.name);
+  }
+  if (act === "rmextra" && (!ex.name || confirm(`Remove ${ex.name}?`))) exs.splice(i, 1);
+  if (act === "addset") valuesFor(card).sets.push("");
+  if (act === "rmset" && ex.sets.length) ex.sets.pop();
+  if (act === "del" && confirm(`Delete ${ex.name || "this exercise"}?`)) exs.splice(i, 1);
+  if (act === "up" && i > 0) [exs[i - 1], exs[i]] = [exs[i], exs[i - 1]];
+  if (act === "down" && i < exs.length - 1) [exs[i + 1], exs[i]] = [exs[i], exs[i + 1]];
+  save(); render();
+  const sel = card.dataset.x ? `[data-x="${card.dataset.x}"]` : `[data-t="${card.dataset.t}"][data-w="${w}"]`;
+  if (act === "addset") document.querySelector(`.card${sel}[data-i="${i}"] .sets input:last-of-type`)?.focus();
+});
+
+$("#weeknav").addEventListener("click", (e) => {
+  const b = e.target.closest("button");
+  if (!b) return;
+  // No future weeks or weeks before tracking started; the label jumps back to this week.
+  weekOffset = b.dataset.d ? Math.max(minOffset, Math.min(0, weekOffset + +b.dataset.d)) : 0;
+  render(); scrollTo(0, 0);
+});
+$("#days").addEventListener("click", (e) => {
+  if (e.target.dataset.i == null) return;
+  dayIdx = +e.target.dataset.i; render(); scrollTo(0, 0);
+});
+$("#week").addEventListener("click", (e) => {
+  if (!e.target.dataset.w) return;
+  data.week = weekOffset % 2 === 0 ? e.target.dataset.w : flip(e.target.dataset.w); save(); render();
+});
+$("#edit").addEventListener("click", () => { editing = !editing; render(); });
+$("#refresh").addEventListener("click", async () => {
+  status("checking calendar…");
+  await loadSchedule();
+  status(schedErr ? "calendar error" : "calendar updated");
+  render();
+});
+$("#tabs").addEventListener("click", (e) => {
+  if (!e.target.dataset.v) return;
+  view = e.target.dataset.v; editing = false; render(); scrollTo(0, 0);
+});
+
+load();
+</script>
+</body>
+</html>
