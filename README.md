@@ -15,5 +15,5 @@ Then open the printed address on your phone (same Wi-Fi). Needs Python 3.9+ and 
 - `index.html`: the app
 - `server.py`: serves the app, saves data, and reads the calendar
 - `seed.json`: the starting plan, used when `data.json` doesn't exist yet
-- `data.json`: your plan and log (created on first save, not in git)
-- `calendar_url.txt`: optional Google Calendar secret iCal address (not in git)
+- `data.json`: your plan and log (created on first save, not in git). See `data.example.json` for the format.
+- `calendar_url.txt`: optional Google Calendar secret iCal address (not in git). Copy `calendar_url.example.txt` and paste in your own.

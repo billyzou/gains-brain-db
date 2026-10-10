@@ -1,0 +1,1 @@
+https://calendar.google.com/calendar/ical/YOUR_CALENDAR_ID%40group.calendar.google.com/private-YOUR_SECRET_KEY/basic.ics

@@ -1,0 +1,29 @@
+{
+  "week": "A",
+  "days": [
+    {"day": "Sun", "note": "",
+     "A": [{"name": "Trap Bar DL", "reps": "5-8", "weight": "85", "sets": ["6", "6"]}],
+     "B": [{"name": "Trap Bar RDL", "reps": "6-8", "weight": "65", "sets": ["6", "7"]}]},
+    {"day": "Mon", "note": "Rest", "A": [], "B": []},
+    {"day": "Tue", "note": "",
+     "A": [{"name": "Incline Bench Press", "reps": "8-12", "weight": "40", "sets": ["9", "8"]}],
+     "B": [{"name": "Bench Press", "reps": "6-10", "weight": "57.5", "sets": ["", ""]}]},
+    {"day": "Wed", "note": "Rest", "A": [], "B": []},
+    {"day": "Thu", "note": "Muay Thai Pads", "A": [], "B": []},
+    {"day": "Fri", "note": "Rest", "A": [], "B": []},
+    {"day": "Sat", "note": "Muay Thai Pads", "A": [], "B": []}
+  ],
+  "log": [
+    {"date": "2026-10-04", "week": "A", "name": "Trap Bar DL", "weight": "85", "sets": ["6", "6"]},
+    {"date": "2026-10-08", "name": "Muay Thai Pads"}
+  ],
+  "extras": {
+    "2026-10-06": [{"name": "Farmer Carry", "weight": "50", "sets": ["30", ""]}]
+  },
+  "drafts": {
+    "2026-10-06": {"Incline Bench Press": {"weight": "42.5", "sets": ["8", ""]}}
+  },
+  "skips": {
+    "2026-10-10": ["Muay Thai Pads"]
+  }
+}
