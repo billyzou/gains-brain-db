@@ -66,7 +66,7 @@
     padding: 12px 16px 24px; display: grid; gap: 12px; align-content: start; }
   .date { font-size: 14px; color: var(--muted); font-weight: 600; }
   .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
-  .note { font-size: 20px; padding: 24px 14px; color: var(--muted); justify-content: center; }
+  .note { font-size: 20px; padding: 24px 14px; color: var(--muted); justify-content: center; min-height: 90px; }
   .name { font-weight: 650; font-size: 17px; }
   .reps { color: var(--muted); font-size: 14px; margin-left: 4px; font-weight: 400; }
   .label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em;
@@ -102,6 +102,10 @@
   .log .entry { gap: 12px; }
   .sub { font-size: 14px; color: var(--muted); }
   .empty { color: var(--muted); font-size: 14px; }
+  /* Same line height for notes (whose emoji would stretch the line) and section labels, and no
+     extra gap above a label right under the date row, so the first line sits at the same spot. */
+  .empty, .section { line-height: 20px; }
+  main > .row + .section { margin-top: 0; }
   .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
   .cal-grid .dow { font-size: 12px; color: var(--muted); padding-bottom: 4px; }
   .cal-grid button { aspect-ratio: 1; border: 0; border-radius: 10px; background: none; color: var(--text);
@@ -319,13 +323,13 @@ function renderPlan() {
   const wk = weekOf(date);
   let html = `<div class="row">
       <div class="date" style="flex:1">${editing ? `Editing your default ${fmt(date, { weekday: "long" })} plan`
-        : fmt(date, { weekday: "long", month: "short", day: "numeric" })}</div>
+        : fmt(date, { month: "short", day: "numeric" })}</div>
       <div class="seg">${["A", "B"].map((w) => `<button data-act="week" data-w="${w}" class="${w === wk ? "on" : ""}">${w}</button>`).join("")}</div>
     </div>`;
   if (!editing && date < START) return html + `<div class="card note row">Before tracking started (Oct 1)</div>`;
   if (!editing) {
     html += calNotes(date);
-    if (!ps.length) html += `<div class="card note row">Nothing planned</div>`;
+    if (!ps.length) html += `<div class="card note row">Rest</div>`;
   }
 
   for (const { t, w } of ps) {
@@ -340,7 +344,7 @@ function renderPlan() {
         ${!isRest(day.note) ? `<button class="check" data-act="checknote" aria-label="Done">✓</button>` : ""}
         <div style="${exs.length ? "color:var(--muted)" : ""}">${esc(noTime(day.note))}</div></div>`;
     }
-    if (!editing && !day.note && !exs.length) html += `<div class="card note row">Nothing planned</div>`;
+    if (!editing && !day.note && !exs.length) html += `<div class="card note row">Rest</div>`;
     if (!editing && exs.length && !todo.length) html += `<div class="empty">All planned exercises done 💪</div>`;
 
     html += todo.map(({ ex, i }) => {
@@ -415,7 +419,7 @@ function plannedSection(date) {
     </div>`;
   }).join("");
   return `<div class="section">Planned</div>
-    <div class="card" style="display:grid;gap:10px">${rows || `<div class="empty">Rest day</div>`}</div>`;
+    <div class="card" style="display:grid;gap:10px">${rows || `<div class="empty">Rest</div>`}</div>`;
 }
 
 const listOf = (card) => card.dataset.x ? data.extras[card.dataset.x] : exsOf(+card.dataset.t, card.dataset.w);
