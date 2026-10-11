@@ -52,8 +52,14 @@ class Handler(SimpleHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(body)
         elif self.path in ("/", "/index.html"):
-            self.path = "/index.html"
-            super().do_GET()
+            with open(os.path.join(HERE, "index.html"), "rb") as f:
+                body = f.read()
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Cache-Control", "no-cache")  # Home Screen apps otherwise keep a stale copy
+            self.end_headers()
+            self.wfile.write(body)
+            print("page loaded", self.log_date_time_string(), self.client_address[0], self.headers.get("User-Agent", "")[:90], flush=True)
         elif self.path in STATIC:
             with open(os.path.join(HERE, self.path.lstrip("/")), "rb") as f:
                 body = f.read()
