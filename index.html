@@ -26,17 +26,28 @@
     }
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  /* App shell: the page itself never scrolls (iOS Home Screen apps misplace fixed bars when it
+     does); header and tab bar are rows of a full-screen frame and only <main> scrolls. */
+  html { background: var(--bg); }
   body {
     margin: 0; background: var(--bg); color: var(--text);
     font: 16px/1.35 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    padding: env(safe-area-inset-top) 0 calc(80px + env(safe-area-inset-bottom));
+    position: fixed; inset: 0; display: flex; flex-direction: column;
+    padding-top: env(safe-area-inset-top);
+  }
+  /* iOS Home Screen apps draw under the status bar but size the frame as if it took space,
+     leaving a status-bar-tall gap at the bottom. Stretch the frame down by that much. */
+  @media (display-mode: standalone) {
+    body { bottom: calc(-1 * env(safe-area-inset-top)); }
   }
   header {
-    position: sticky; top: 0; z-index: 2; background: var(--bg);
+    flex: none; background: var(--bg);
     padding: 12px 16px 8px; border-bottom: 1px solid var(--line);
   }
   .row { display: flex; align-items: center; gap: 8px; }
-  h1 { font-size: 22px; margin: 0; white-space: nowrap; }
+  h1 { font-size: 22px; margin: 0; white-space: nowrap; display: flex; align-items: center; gap: 8px; }
+  .logo { width: 48px; height: 42px; flex: none; margin: -4px 0; }
+  .logo .bar { fill: var(--text); }
   #status { flex: 1; min-width: 0; text-align: right; font-size: 12px; color: var(--muted);
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .seg { display: flex; background: var(--chip); border-radius: 10px; padding: 3px; }
@@ -51,8 +62,9 @@
     width: 4px; height: 4px; margin-left: -2px; border-radius: 50%; background: var(--accent); }
   #weeknav { margin-top: 10px; }
   #weeklabel { flex: 1; border: 0; background: none; color: var(--text); font: inherit; font-weight: 600; }
-  body.cal #days, body.cal #weeknav, body.cal #week, body.cal #edit { display: none; }
-  main { padding: 12px 16px; display: grid; gap: 12px; }
+  body.cal #days, body.cal #weeknav, body.cal #edit { display: none; }
+  main { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+    padding: 12px 16px 24px; display: grid; gap: 12px; align-content: start; }
   .date { font-size: 14px; color: var(--muted); font-weight: 600; }
   .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
   .note { font-size: 20px; padding: 24px 14px; color: var(--muted); justify-content: center; }
@@ -102,7 +114,7 @@
   .cal-grid button.plan::after { content: ""; position: absolute; bottom: 5px; left: 50%; width: 5px; height: 5px;
     margin-left: -2.5px; border-radius: 50%; background: var(--accent); }
   .month { font-size: 18px; font-weight: 650; flex: 1; text-align: center; }
-  footer { position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg);
+  footer { flex: none; background: var(--bg);
     border-top: 1px solid var(--line); padding: 8px 16px calc(8px + env(safe-area-inset-bottom)); }
   footer button { flex: 1; border: 0; background: none; color: var(--muted); font: inherit;
     font-weight: 600; padding: 10px; border-radius: 10px; }
@@ -112,13 +124,10 @@
 <body>
 <header>
   <div class="row">
-    <h1>Gains Brain</h1>
+    <h1><svg class="logo" viewBox="34 80 444 392" aria-hidden="true"><g fill="none" stroke="#b8487a" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"><path d="M136 330 Q82 300 104 228 Q118 188 160 150"/><path d="M376 330 Q430 300 408 228 Q394 188 352 150"/></g><g fill="none" stroke="#f7a8c4" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"><path d="M136 330 Q82 300 104 228 Q118 188 160 150"/><path d="M376 330 Q430 300 408 228 Q394 188 352 150"/></g><g class="bar"><rect x="110" y="126" width="292" height="22" rx="8"/><rect x="70" y="86" width="40" height="102" rx="12"/><rect x="40" y="104" width="30" height="66" rx="10"/><rect x="402" y="86" width="40" height="102" rx="12"/><rect x="442" y="104" width="30" height="66" rx="10"/></g><g fill="#f7a8c4" stroke="#b8487a" stroke-width="8"><circle cx="160" cy="137" r="22"/><circle cx="352" cy="137" r="22"/></g><g fill="#b8487a"><circle cx="194.0" cy="226.0" r="42"/><circle cx="227.5" cy="240.6" r="42"/><circle cx="250.4" cy="279.8" r="42"/><circle cx="255.4" cy="331.1" r="42"/><circle cx="240.9" cy="378.2" r="42"/><circle cx="211.5" cy="406.3" r="42"/><circle cx="176.5" cy="406.3" r="42"/><circle cx="147.1" cy="378.2" r="42"/><circle cx="132.6" cy="331.1" r="42"/><circle cx="137.6" cy="279.8" r="42"/><circle cx="160.5" cy="240.6" r="42"/><circle cx="318.0" cy="226.0" r="42"/><circle cx="351.5" cy="240.6" r="42"/><circle cx="374.4" cy="279.8" r="42"/><circle cx="379.4" cy="331.1" r="42"/><circle cx="364.9" cy="378.2" r="42"/><circle cx="335.5" cy="406.3" r="42"/><circle cx="300.5" cy="406.3" r="42"/><circle cx="271.1" cy="378.2" r="42"/><circle cx="256.6" cy="331.1" r="42"/><circle cx="261.6" cy="279.8" r="42"/><circle cx="284.5" cy="240.6" r="42"/></g><g fill="#f7a8c4"><circle cx="194.0" cy="226.0" r="30"/><circle cx="227.5" cy="240.6" r="30"/><circle cx="250.4" cy="279.8" r="30"/><circle cx="255.4" cy="331.1" r="30"/><circle cx="240.9" cy="378.2" r="30"/><circle cx="211.5" cy="406.3" r="30"/><circle cx="176.5" cy="406.3" r="30"/><circle cx="147.1" cy="378.2" r="30"/><circle cx="132.6" cy="331.1" r="30"/><circle cx="137.6" cy="279.8" r="30"/><circle cx="160.5" cy="240.6" r="30"/><circle cx="318.0" cy="226.0" r="30"/><circle cx="351.5" cy="240.6" r="30"/><circle cx="374.4" cy="279.8" r="30"/><circle cx="379.4" cy="331.1" r="30"/><circle cx="364.9" cy="378.2" r="30"/><circle cx="335.5" cy="406.3" r="30"/><circle cx="300.5" cy="406.3" r="30"/><circle cx="271.1" cy="378.2" r="30"/><circle cx="256.6" cy="331.1" r="30"/><circle cx="261.6" cy="279.8" r="30"/><circle cx="284.5" cy="240.6" r="30"/><ellipse cx="194" cy="318" rx="66" ry="96"/><ellipse cx="318" cy="318" rx="66" ry="96"/></g><path d="M256 214 Q250 250 258 284 Q264 306 256 324" fill="none" stroke="#b8487a" stroke-width="10" stroke-linecap="round"/><g fill="none" stroke="#b8487a" stroke-width="9" stroke-linecap="round"><path d="M214 236 Q196 252 212 272 Q228 292 206 306"/><path d="M160 262 Q180 270 174 292"/><path d="M140 318 Q162 310 170 330 Q178 350 160 362"/><path d="M150 398 Q172 386 186 404"/><path d="M196 434 Q208 416 226 424"/><g transform="translate(512 0) scale(-1 1)"><path d="M214 236 Q196 252 212 272 Q228 292 206 306"/><path d="M160 262 Q180 270 174 292"/><path d="M140 318 Q162 310 170 330 Q178 350 160 362"/><path d="M150 398 Q172 386 186 404"/><path d="M196 434 Q208 416 226 424"/></g></g><g fill="#3a1830"><ellipse cx="226" cy="356" rx="11" ry="14"/><ellipse cx="286" cy="356" rx="11" ry="14"/></g><path d="M234 384 Q256 404 278 384" fill="none" stroke="#3a1830" stroke-width="9" stroke-linecap="round"/></svg>Gains Brain</h1>
     <span id="status"></span>
     <button class="btn" id="refresh" aria-label="Refresh from calendar">↻</button>
     <button class="btn" id="edit">Edit</button>
-    <div class="seg" id="week">
-      <button data-w="A">A</button><button data-w="B">B</button>
-    </div>
   </div>
   <div class="row" id="weeknav">
     <button class="btn" data-d="-1" aria-label="Previous week">‹</button>
@@ -171,10 +180,10 @@ const START = "2026-10-01"; // tracking starts here: nothing can be logged or pl
 const sow = (d) => { const x = new Date(d); x.setDate(x.getDate() - x.getDay()); return x; }; // start of week
 const minOffset = Math.round((sow(parse(START)) - sow(today)) / 6048e5); // earliest week the Today tab can show
 const exsOf = (t, w = data.week) => data.days[t][w];
-// A/B for any date, assuming the weeks alternate starting from the current week's choice.
+// data.week is the letter of the week starting data.weekAnchor; other weeks alternate from it.
 function weekOf(date) {
-  const weeks = Math.round((sow(parse(date)) - sow(today)) / 6048e5);
-  return weeks % 2 === 0 ? data.week : flip(data.week);
+  const weeks = Math.round((sow(parse(date)) - sow(parse(data.weekAnchor))) / 6048e5);
+  return Math.abs(weeks) % 2 === 0 ? data.week : flip(data.week);
 }
 const hasSession = (t, w) => exsOf(t, w).length || (data.days[t].note && !isRest(data.days[t].note));
 const isRest = (note) => /^rest$/i.test(note.trim());
@@ -214,6 +223,7 @@ async function load() {
   data.extras = data.extras || {}; // one-off exercises added for a single date
   data.drafts = data.drafts || {}; // per-date edits to planned cards, until checked off
   data.skips = data.skips || {}; // Muay Thai sessions you unchecked, by date
+  data.weekAnchor = data.weekAnchor || iso(sow(today)); // a fresh setup starts with this week
   await loadSchedule();
   localStorage.setItem("gains-brain-cache", JSON.stringify(data));
   render();
@@ -269,7 +279,6 @@ function render() {
   $("#edit").textContent = editing ? "Done" : "Edit";
   $("#edit").classList.toggle("primary", editing);
   document.querySelectorAll("#tabs button").forEach((b) => b.classList.toggle("on", b.dataset.v === view));
-  document.querySelectorAll("#week button").forEach((b) => b.classList.toggle("on", b.dataset.w === weekOf(curDate())));
   const startLabel = weekStart().toLocaleDateString(undefined, { month: "short", day: "numeric" });
   $('#weeknav [data-d="1"]').disabled = weekOffset >= 0;
   $('#weeknav [data-d="-1"]').disabled = weekOffset <= minOffset;
@@ -309,8 +318,12 @@ function exBody(ex, date, aside = "") {
 function renderPlan() {
   const date = curDate(), ps = plansFor(date);
   const logged = new Set(logFor(date).map((e) => e.name));
-  let html = `<div class="date">${editing ? `Editing your default ${fmt(date, { weekday: "long" })} plan`
-    : fmt(date, { weekday: "long", month: "short", day: "numeric" })}</div>`;
+  const wk = weekOf(date);
+  let html = `<div class="row">
+      <div class="date" style="flex:1">${editing ? `Editing your default ${fmt(date, { weekday: "long" })} plan`
+        : fmt(date, { weekday: "long", month: "short", day: "numeric" })}</div>
+      <div class="seg">${["A", "B"].map((w) => `<button data-act="week" data-w="${w}" class="${w === wk ? "on" : ""}">${w}</button>`).join("")}</div>
+    </div>`;
   if (!editing && date < START) return html + `<div class="card note row">Before tracking started (Oct 1)</div>`;
   if (!editing) {
     html += calNotes(date);
@@ -458,6 +471,7 @@ $("#main").addEventListener("click", (e) => {
     save(); return render();
   }
   if (act === "cal") { calSel = b.dataset.date; return render(); }
+  if (act === "week") { data.week = b.dataset.w; data.weekAnchor = iso(weekStart()); save(); return render(); }
   if (act === "month") {
     const next = new Date(calMonth.getFullYear(), calMonth.getMonth() + +b.dataset.d, 1);
     if (iso(next) >= START.slice(0, 8) + "01") calMonth = next; // not before the start month
@@ -516,15 +530,11 @@ $("#weeknav").addEventListener("click", (e) => {
   if (!b) return;
   // No future weeks or weeks before tracking started; the label jumps back to this week.
   weekOffset = b.dataset.d ? Math.max(minOffset, Math.min(0, weekOffset + +b.dataset.d)) : 0;
-  render(); scrollTo(0, 0);
+  render(); $("#main").scrollTo(0, 0);
 });
 $("#days").addEventListener("click", (e) => {
   if (e.target.dataset.i == null) return;
-  dayIdx = +e.target.dataset.i; render(); scrollTo(0, 0);
-});
-$("#week").addEventListener("click", (e) => {
-  if (!e.target.dataset.w) return;
-  data.week = weekOffset % 2 === 0 ? e.target.dataset.w : flip(e.target.dataset.w); save(); render();
+  dayIdx = +e.target.dataset.i; render(); $("#main").scrollTo(0, 0);
 });
 $("#edit").addEventListener("click", () => { editing = !editing; render(); });
 $("#refresh").addEventListener("click", async () => {
@@ -535,7 +545,7 @@ $("#refresh").addEventListener("click", async () => {
 });
 $("#tabs").addEventListener("click", (e) => {
   if (!e.target.dataset.v) return;
-  view = e.target.dataset.v; editing = false; render(); scrollTo(0, 0);
+  view = e.target.dataset.v; editing = false; render(); $("#main").scrollTo(0, 0);
 });
 
 load();
