@@ -1,5 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <rect width="512" height="512" fill="#2f6fde"/>
+  <rect width="512" height="512" rx="112" fill="#2f6fde"/>
+  <!-- ground shadow -->
+  <ellipse cx="256" cy="444" rx="150" ry="18" fill="#2459b8"/>
+  <!-- character, scaled down to leave room around it -->
+  <g transform="translate(256 268) scale(0.86) translate(-256 -268)">
 
   <!-- arms: from the brain's sides up to the bar -->
   <g fill="none" stroke="#b8487a" stroke-width="34" stroke-linecap="round" stroke-linejoin="round">
@@ -44,4 +48,5 @@
     <ellipse cx="286" cy="356" rx="11" ry="14"/>
   </g>
   <path d="M234 384 Q256 404 278 384" fill="none" stroke="#3a1830" stroke-width="9" stroke-linecap="round"/>
+  </g>
 </svg>
