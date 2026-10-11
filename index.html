@@ -71,6 +71,7 @@
   .reps { color: var(--muted); font-size: 14px; margin-left: 4px; font-weight: 400; }
   .label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em;
     margin: 12px 0 6px; }
+  .total { font-size: 14px; font-weight: 600; color: var(--text); }
   input { font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--line);
     border-radius: 10px; padding: 10px; width: 100%; min-width: 0; }
   input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
@@ -78,7 +79,10 @@
   .step { flex: none; width: 48px; height: 48px; border: 0; border-radius: 12px; background: var(--chip);
     color: var(--text); font-size: 24px; }
   .sets { display: flex; gap: 8px; flex-wrap: wrap; }
-  .sets input { width: 64px; text-align: center; font-size: 18px; }
+  .sets select { width: 64px; padding: 10px 0; font: inherit; font-size: 18px; color: var(--text); background: var(--bg);
+    border: 1px solid var(--line); border-radius: 10px; text-align: center; text-align-last: center;
+    -webkit-appearance: none; appearance: none; }
+  .sets select:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
   .addset { width: 48px; border: 1px dashed var(--line); background: none; color: var(--muted);
     border-radius: 10px; font-size: 20px; }
   .prev { margin-top: 10px; font-size: 13px; color: var(--muted); }
@@ -299,11 +303,42 @@ function calNotes(date) {
   return html;
 }
 
+// A reps box: a <select>, which iPhone shows as a scroll wheel. 1–50, blank to clear, and any
+// other existing value (like 9.5) kept as an option. An empty box places its blank "–" right
+// above `hint` (the last logged reps), so the wheel opens one flick away from that number.
+const REPS = Array.from({ length: 50 }, (_, k) => String(k + 1));
+function repsPicker(value, j, hint) {
+  let opts = REPS;
+  for (const v of [value, hint]) if (v && !opts.includes(v)) opts = [...opts, v].sort((a, b) => a - b);
+  const at = !value && opts.includes(hint) ? opts.indexOf(hint) : 0;
+  const html = opts.map((o) => `<option${o === value ? " selected" : ""}>${o}</option>`);
+  html.splice(at, 0, `<option value=""${value ? "" : " selected"}>–</option>`);
+  return `<select data-f="set" data-j="${j}" aria-label="Reps for set ${j + 1}">${html.join("")}</select>`;
+}
+// Reps to aim an empty set's wheel at: the same set last time, else the last set logged then,
+// else the bottom of the exercise's rep range.
+function repsHint(ex, last, j) {
+  const sets = (last && last.sets) || [];
+  return sets[j] || sets[sets.length - 1] || ((ex.reps || "").match(/^\d+/) || [""])[0];
+}
+
 // Weight, reps-per-set and "Last" lines shared by planned and one-off exercise cards.
 // `aside` goes at the right end of the "Reps per set" line (used for one-off cards' Remove button).
+// Total weight for one rep, from the per-side number: trap bar 2×+55, bench presses 2×+45,
+// Bulgarian split squats 1×+10, pull-ups none (bodyweight), everything else 2×+10.
+// Blank for non-numbers like "L3".
+function totalText(name, weight) {
+  const n = parseFloat(weight);
+  if (isNaN(n) || /pull-?ups?/i.test(name)) return "";
+  const add = /trap bar/i.test(name) ? 55 : /bench press/i.test(name) ? 45 : 10;
+  const sides = /bulgarian split squat/i.test(name) ? 1 : 2;
+  return `Total ${+(sides * n + add).toFixed(2)} lb`;
+}
+
 function exBody(ex, date, aside = "") {
   const p = ex.name && prevEntry(ex.name, date);
-  return `<div class="label">Weight</div>
+  return `<div class="row" style="margin:12px 0 6px"><div class="label" style="margin:0;flex:1">Weight per side</div>
+      <span class="total">${totalText(ex.name, ex.weight)}</span></div>
     <div class="row weight">
       <button class="step" data-step="-2.5">−</button>
       <input data-f="weight" value="${esc(ex.weight)}" inputmode="decimal">
@@ -311,7 +346,7 @@ function exBody(ex, date, aside = "") {
     </div>
     <div class="row" style="margin:12px 0 6px"><div class="label" style="margin:0;flex:1">Reps per set</div>${aside}</div>
     <div class="sets">
-      ${ex.sets.map((s, j) => `<input data-f="set" data-j="${j}" value="${esc(s)}" inputmode="decimal">`).join("")}
+      ${ex.sets.map((s, j) => repsPicker(s, j, repsHint(ex, p, j))).join("")}
       <button class="addset" data-act="addset">+</button>
     </div>
     ${p ? `<div class="prev">Last (${fmt(p.date, { month: "short", day: "numeric" })}): ${esc(detail(p) || "—")}</div>` : ""}`;
@@ -437,7 +472,7 @@ function clearDraft(date, name) {
 }
 
 // Typing: update data in place without re-rendering, so the keyboard stays open.
-$("#main").addEventListener("input", (e) => {
+function onEdit(e) {
   const f = e.target.dataset.f;
   if (!f) return;
   const card = e.target.closest(".card");
@@ -445,8 +480,15 @@ $("#main").addEventListener("input", (e) => {
   if (f === "name" || f === "reps") listOf(card)[+card.dataset.i][f] = e.target.value;
   else if (f === "set") valuesFor(card).sets[+e.target.dataset.j] = e.target.value;
   else valuesFor(card)[f] = e.target.value;
+  if (f === "weight" || f === "name") updateTotal(card);
   save();
-});
+}
+function updateTotal(card) {
+  const el = card.querySelector(".total");
+  if (el) el.textContent = totalText(listOf(card)[+card.dataset.i].name, card.querySelector("input[data-f=weight]").value);
+}
+$("#main").addEventListener("input", onEdit);
+$("#main").addEventListener("change", (e) => { if (e.target.tagName === "SELECT") onEdit(e); });
 
 // Naming a one-off exercise you've logged before fills in its last weight and reps, if still blank.
 $("#main").addEventListener("change", (e) => {
@@ -507,6 +549,7 @@ $("#main").addEventListener("click", (e) => {
     const n = Math.max(0, (m ? +m[1] : 0) + +b.dataset.step);
     v.weight = String(+n.toFixed(2)) + (m ? m[2] : "");
     b.parentElement.querySelector("input").value = v.weight;
+    updateTotal(card);
     return save();
   }
   if (act === "check") {
@@ -524,7 +567,7 @@ $("#main").addEventListener("click", (e) => {
   if (act === "down" && i < exs.length - 1) [exs[i + 1], exs[i]] = [exs[i], exs[i + 1]];
   save(); render();
   const sel = card.dataset.x ? `[data-x="${card.dataset.x}"]` : `[data-t="${card.dataset.t}"][data-w="${w}"]`;
-  if (act === "addset") document.querySelector(`.card${sel}[data-i="${i}"] .sets input:last-of-type`)?.focus();
+  if (act === "addset") document.querySelector(`.card${sel}[data-i="${i}"] .sets select:last-of-type`)?.focus();
 });
 
 $("#weeknav").addEventListener("click", (e) => {
