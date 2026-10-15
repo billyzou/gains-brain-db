@@ -110,12 +110,12 @@
    "note": "",
    "A": [
     {
-     "name": "Belt Squats",
-     "reps": "6-10",
-     "weight": "95",
+     "name": "Incline Bench Press",
+     "reps": "8-12",
+     "weight": "40",
      "sets": [
       "9",
-      "9"
+      "8"
      ]
     },
     {
@@ -128,21 +128,12 @@
      ]
     },
     {
-     "name": "Incline Bench Press",
-     "reps": "8-12",
-     "weight": "40",
+     "name": "Belt Squats",
+     "reps": "6-10",
+     "weight": "95",
      "sets": [
       "9",
-      "8"
-     ]
-    },
-    {
-     "name": "Kettlebell Swing",
-     "reps": "15-20",
-     "weight": "L3",
-     "sets": [
-      "",
-      ""
+      "9"
      ]
     },
     {
@@ -153,16 +144,25 @@
       "",
       ""
      ]
+    },
+    {
+     "name": "Kettlebell Swing",
+     "reps": "15-20",
+     "weight": "L3",
+     "sets": [
+      "",
+      ""
+     ]
     }
    ],
    "B": [
     {
-     "name": "Bulgarian Split Squats",
-     "reps": "8-12",
-     "weight": "55",
+     "name": "Bench Press",
+     "reps": "6-10",
+     "weight": "57.5",
      "sets": [
-      "8",
-      "8"
+      "",
+      ""
      ]
     },
     {
@@ -175,9 +175,18 @@
      ]
     },
     {
-     "name": "Bench Press",
-     "reps": "6-10",
-     "weight": "57.5",
+     "name": "Bulgarian Split Squats",
+     "reps": "8-12",
+     "weight": "55",
+     "sets": [
+      "8",
+      "8"
+     ]
+    },
+    {
+     "name": "Wrist Curls",
+     "reps": "8-12",
+     "weight": "15",
      "sets": [
       "",
       ""
@@ -187,15 +196,6 @@
      "name": "Kettlebell Swing",
      "reps": "15-20",
      "weight": "L3",
-     "sets": [
-      "",
-      ""
-     ]
-    },
-    {
-     "name": "Wrist Curls",
-     "reps": "8-12",
-     "weight": "15",
      "sets": [
       "",
       ""
