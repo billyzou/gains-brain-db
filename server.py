@@ -26,6 +26,8 @@ STATIC = {  # files besides index.html the page can load, with their content typ
     "/icon-180.png": "image/png",
     "/icon-192.png": "image/png",
     "/icon-512.png": "image/png",
+    "/favicon.svg": "image/svg+xml",
+    "/favicon.png": "image/png",
 }
 _cache = {"body": None}  # last good result, used if Google can't be reached
 

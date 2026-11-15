@@ -25,6 +25,7 @@ On iPhone, open it in Safari and tap Share → Add to Home Screen. It opens full
 - `index.html`: the app
 - `server.py`: serves the app, saves data, and reads the calendar
 - `manifest.webmanifest`, `icon-*.png`: Home Screen app name and icons (`icon.svg` is the source)
+- `favicon.svg`, `favicon.png`: browser tab icon, the logo alone with no background
 - `docs/logo.svg`, `docs/screenshots/`: the logo and screenshots above
 - `seed.json`: the starting plan, used when `data.json` doesn't exist yet
 - `data.json`: your plan and log (created on first save, not in git). See `data.example.json` for the format.
