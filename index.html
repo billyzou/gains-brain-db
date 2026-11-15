@@ -19,12 +19,14 @@
     --bg: #f4f4f1; --card: #fff; --text: #1b1b1a; --muted: #77756f; --line: #e3e1db;
     --accent: #2f6fde; --accent-text: #fff; --danger: #c8412f; --chip: #eae8e2;
     --done: #2e9d5b; --done-soft: #dff1e5;
+    --s1: #2a78d6; --s2: #eb6834; /* chart series: lifting, Muay Thai */
   }
   @media (prefers-color-scheme: dark) {
     :root {
       --bg: #121212; --card: #1d1d1c; --text: #ecebe7; --muted: #9a988f; --line: #2e2d2b;
       --accent: #5b8ff0; --accent-text: #0b0b0b; --danger: #ef6b58; --chip: #2a2a28;
       --done: #4cc47e; --done-soft: #1d3426;
+      --s1: #3987e5; --s2: #d95926;
     }
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -63,7 +65,9 @@
     width: 4px; height: 4px; margin-left: -2px; border-radius: 50%; background: var(--accent); }
   #weeknav { margin-top: 10px; }
   #weeklabel { flex: 1; border: 0; background: none; color: var(--text); font: inherit; font-weight: 600; }
-  body.cal #days, body.cal #weeknav, body.cal #edit { display: none; }
+  body.cal #days, body.cal #weeknav, body.cal #edit,
+  body.trends #days, body.trends #weeknav, body.trends #edit { display: none; }
+  #days small { display: none; pointer-events: none; } /* dates show only in the desktop sidebar */
   main { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
     padding: 12px 16px 24px; display: grid; gap: 12px; align-content: start; }
   .date { font-size: 14px; color: var(--muted); font-weight: 600; }
@@ -128,6 +132,67 @@
   footer button { flex: 1; border: 0; background: none; color: var(--muted); font: inherit;
     font-weight: 600; padding: 10px; border-radius: 10px; }
   footer button.on { background: var(--chip); color: var(--text); }
+  .cal-side { display: contents; } /* the calendar's day details; a column of its own on desktop */
+
+  /* Trends */
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
+  .tile .sub { font-size: 13px; }
+  .tile .val { font-size: 28px; font-weight: 650; margin-top: 2px; }
+  .chart { display: block; width: 100%; height: auto; margin-top: 10px; touch-action: pan-y; }
+  .chart text { font-size: 11px; fill: var(--muted); font-variant-numeric: tabular-nums; }
+  .chart text.end { fill: var(--text); font-weight: 600; font-size: 12px; }
+  .chart .grid { stroke: var(--line); stroke-width: 1; }
+  .chart .line { fill: none; stroke: var(--s1); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+  .chart .dot { fill: var(--s1); stroke: var(--card); stroke-width: 2; }
+  .chart .hl rect { fill: var(--chip); }
+  .chart .hl line { stroke: var(--muted); stroke-width: 1; }
+  .legend { display: flex; gap: 16px; font-size: 13px; color: var(--muted); }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+  .delta { font-size: 13px; font-weight: 600; color: var(--muted); white-space: nowrap; }
+  .delta.up { color: var(--done); }
+  details { margin-top: 8px; font-size: 13px; }
+  summary { color: var(--muted); cursor: pointer; }
+  table { width: 100%; border-collapse: collapse; margin-top: 6px; font-variant-numeric: tabular-nums; }
+  th, td { text-align: left; padding: 5px 4px; border-bottom: 1px solid var(--line); }
+  th { color: var(--muted); font-weight: 600; }
+  #tip { position: fixed; z-index: 10; pointer-events: none; background: var(--text); color: var(--bg);
+    font-size: 13px; padding: 6px 9px; border-radius: 8px; max-width: 240px; }
+
+  /* Desktop: the header and tab bar become a left sidebar (display: contents lets their pieces
+     sit in the page grid), and the content uses the width for columns of cards. */
+  @media (min-width: 900px) {
+    html { min-height: 0; }
+    body { padding-top: 0; display: grid; grid-template-columns: 300px 1fr;
+      grid-template-rows: auto auto auto auto 1fr; }
+    header, footer { display: contents; }
+    header > .row:first-child { grid-column: 1; grid-row: 1; padding: 18px 16px 14px; }
+    h1 { font-size: 19px; gap: 6px; min-width: 0; } /* shrinks before the buttons spill out of the sidebar */
+    header > .row:first-child .btn { padding: 7px 10px; }
+    .logo { width: 40px; height: 35px; }
+    #tabs { grid-column: 1; grid-row: 2; flex-direction: column; align-items: stretch; gap: 2px;
+      padding: 0 10px 14px; border-bottom: 1px solid var(--line); }
+    #tabs button { text-align: left; padding: 9px 12px; }
+    #tabs button:hover:not(.on) { color: var(--text); }
+    #weeknav { grid-column: 1; grid-row: 3; margin: 0; padding: 14px 12px 6px; }
+    #weeklabel { font-size: 14px; }
+    #days { grid-column: 1; grid-row: 4; flex-direction: column; gap: 2px; margin: 0; padding: 4px 12px; overflow: visible; }
+    #days button { display: flex; justify-content: space-between; padding: 9px 12px 9px 22px; text-align: left; background: none; }
+    #days button:hover:not(.on) { background: var(--chip); }
+    #days button.on { background: var(--text); }
+    #days button.today::after { bottom: auto; top: 50%; left: 11px; margin: -2px 0 0; }
+    #days small { display: inline; font-size: 13px; opacity: .65; }
+    #toast { position: fixed; left: auto; right: 24px; bottom: 24px; width: 340px; margin: 0; z-index: 10; }
+    main { grid-column: 2; grid-row: 1 / -1; border-left: 1px solid var(--line);
+      padding: 28px max(32px, calc((100% - 1180px) / 2)) 48px; gap: 16px; }
+    body.plan main, body.trends main { grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); }
+    body.plan main > :not(.card), body.plan main > .card.note, body.plan main > .card.edit-only,
+    body.trends main > :not(.card), main > .card.wide { grid-column: 1 / -1; }
+    main > .btn { justify-self: start; }
+    .log { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+    body.cal main { grid-template-columns: minmax(320px, 420px) 1fr; align-items: start; gap: 24px; }
+    .cal-side { display: grid; gap: 12px; align-content: start; }
+    button:not(:disabled), select { cursor: pointer; }
+  }
 </style>
 </head>
 <body>
@@ -148,9 +213,10 @@
 <footer>
   <div id="toast" hidden></div>
   <div class="row" id="tabs">
-    <button data-v="plan">Today</button><button data-v="cal">Calendar</button>
+    <button data-v="plan">Today</button><button data-v="cal">Calendar</button><button data-v="trends">Trends</button>
   </div>
 </footer>
+<div id="tip" hidden></div>
 
 <script>
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -283,7 +349,7 @@ function logSection(date) {
 
 function render() {
   document.body.classList.toggle("editing", editing);
-  document.body.classList.toggle("cal", view === "cal");
+  for (const v of ["plan", "cal", "trends"]) document.body.classList.toggle(v, view === v);
   $("#edit").textContent = editing ? "Done" : "Edit";
   $("#edit").classList.toggle("primary", editing);
   document.querySelectorAll("#tabs button").forEach((b) => b.classList.toggle("on", b.dataset.v === view));
@@ -291,9 +357,12 @@ function render() {
   $('#weeknav [data-d="1"]').disabled = weekOffset >= 0;
   $('#weeknav [data-d="-1"]').disabled = weekOffset <= minOffset;
   $("#weeklabel").textContent = weekOffset ? `Week of ${startLabel}` : `This week · ${startLabel}`;
-  $("#days").innerHTML = DAYS.map((d, i) =>
-    `<button data-i="${i}" class="${i === dayIdx ? "on" : ""} ${!weekOffset && i === today.getDay() ? "today" : ""}">${d}</button>`).join("");
-  $("#main").innerHTML = view === "cal" ? renderCal() : renderPlan();
+  $("#days").innerHTML = DAYS.map((d, i) => {
+    const dt = weekStart(); dt.setDate(dt.getDate() + i);
+    return `<button data-i="${i}" class="${i === dayIdx ? "on" : ""} ${!weekOffset && i === today.getDay() ? "today" : ""}">${d}<small>${dt.toLocaleDateString(undefined, { month: "short", day: "numeric" })}</small></button>`;
+  }).join("");
+  $("#tip").hidden = true;
+  $("#main").innerHTML = view === "cal" ? renderCal() : view === "trends" ? renderTrends() : renderPlan();
 }
 
 // Calendar status plus "moved to …" / "removed" notes for a date.
@@ -329,13 +398,14 @@ function repsHint(ex, last, j) {
 // Total weight for one rep, from the per-side number: trap bar 2×+55, bench presses 2×+45,
 // Bulgarian split squats 1×+10, pull-ups none (bodyweight), everything else 2×+10.
 // Blank for non-numbers like "L3".
-function totalText(name, weight) {
+function totalLb(name, weight) {
   const n = parseFloat(weight);
-  if (isNaN(n) || /pull-?ups?/i.test(name)) return "";
+  if (isNaN(n) || /pull-?ups?/i.test(name)) return null;
   const add = /trap bar/i.test(name) ? 55 : /bench press/i.test(name) ? 45 : 10;
   const sides = /bulgarian split squat/i.test(name) ? 1 : 2;
-  return `Total ${+(sides * n + add).toFixed(2)} lb`;
+  return +(sides * n + add).toFixed(2);
 }
+const totalText = (name, weight) => { const t = totalLb(name, weight); return t === null ? "" : `Total ${t} lb`; };
 
 function exBody(ex, date, aside = "") {
   const p = ex.name && prevEntry(ex.name, date);
@@ -439,11 +509,13 @@ function renderCal() {
       </div>
       <div class="cal-grid">${cells}</div>
     </div>
+    <div class="cal-side">
     <div class="date">${fmt(calSel, { weekday: "long", month: "short", day: "numeric", year: "numeric" })}</div>
     ${calNotes(calSel)}
     ${plannedSection(calSel)}
     <div class="section">Log</div>
-    ${logSection(calSel)}`;
+    ${logSection(calSel)}
+    </div>`;
 }
 
 function plannedSection(date) {
@@ -458,6 +530,169 @@ function plannedSection(date) {
   return `<div class="section">Planned</div>
     <div class="card" style="display:grid;gap:10px">${rows || `<div class="empty">Rest</div>`}</div>`;
 }
+
+// ---- Trends ----
+// Each exercise is charted by one measure, picked above the charts. Est. 1RM uses the total
+// weight (see totalLb) and the best set: total × (1 + reps / 30). Exercises with no total
+// (pull-ups, "L3") fall back to best-set reps.
+const METRICS = { e1rm: "Est. 1RM", weight: "Weight", reps: "Best set" };
+let trendMetric = "e1rm", charts = []; // charts: hover data for each rendered chart, by data-c
+const shortDate = (s) => fmt(s, { month: "short", day: "numeric" });
+const bestSet = (e) => Math.max(0, ...(e.sets || []).map(parseFloat).filter((n) => !isNaN(n)));
+function metricOf(e, m) {
+  if (m === "weight") { const n = parseFloat(e.weight); return isNaN(n) ? null : n; }
+  const r = bestSet(e);
+  if (m === "reps") return r || null;
+  const t = totalLb(e.name, e.weight);
+  return t && r ? Math.round(t * (1 + r / 30)) : null;
+}
+const fmtMetric = (v, m) => m === "reps" ? `${v} reps` : m === "weight" ? `${v} lb/side` : `${v} lb`;
+
+// Round axis bounds and ticks; never below 0.
+function niceTicks(min, max, n = 4) {
+  if (min === max) { const pad = Math.abs(min) * 0.1 || 1; min -= pad; max += pad; }
+  const raw = (max - min) / (n - 1), mag = 10 ** Math.floor(Math.log10(raw));
+  const step = [1, 2, 2.5, 5, 10].map((k) => k * mag).find((s) => s >= raw);
+  const lo = Math.max(0, Math.floor(min / step) * step), hi = Math.ceil(max / step) * step, ticks = [];
+  for (let v = lo; v <= hi + step / 2; v += step) ticks.push(+v.toFixed(2));
+  return [lo, hi, ticks];
+}
+
+// Width available to a chart inside a card, so SVG text renders at its real size.
+function chartWidth(minCard) {
+  const m = $("#main"), st = getComputedStyle(m);
+  const w = m.clientWidth - parseFloat(st.paddingLeft) - parseFloat(st.paddingRight), gap = parseFloat(st.columnGap) || 12;
+  const cols = minCard && matchMedia("(min-width: 900px)").matches ? Math.max(1, Math.floor((w + gap) / (minCard + gap))) : 1;
+  return Math.floor((w - gap * (cols - 1)) / cols - 30); // 30 = card padding + border
+}
+
+// One series over time: 2px line, ringed dots, the latest value labeled at the end.
+function lineChart(pts, W) {
+  const H = 150, L = 38, R = 10, T = 22, B = 22, pw = W - L - R, ph = H - T - B;
+  const t0 = parse(pts[0].date), span = parse(pts.at(-1).date) - t0;
+  const X = (d) => L + (span ? (parse(d) - t0) / span * pw : pw / 2);
+  const [lo, hi, ticks] = niceTicks(Math.min(...pts.map((p) => p.v)), Math.max(...pts.map((p) => p.v)), 3);
+  const Y = (v) => T + ph - (v - lo) / (hi - lo) * ph;
+  const xy = pts.map((p) => ({ x: X(p.date), y: Y(p.v), tip: p.tip }));
+  const last = xy.at(-1);
+  charts.push({ kind: "line", pts: xy, top: T, bottom: T + ph });
+  return `<svg class="chart" data-c="${charts.length - 1}" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(pts.map((p) => `${shortDate(p.date)}: ${p.v}`).join(", "))}">
+    ${ticks.map((t) => `<line class="grid" x1="${L}" x2="${W - R}" y1="${Y(t)}" y2="${Y(t)}"/><text x="${L - 6}" y="${Y(t) + 4}" text-anchor="end">${t}</text>`).join("")}
+    <g class="hl"></g>
+    ${xy.length > 1 ? `<path class="line" d="M${xy.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join("L")}"/>` : ""}
+    ${xy.map((p) => `<circle class="dot" cx="${p.x}" cy="${p.y}" r="4"/>`).join("")}
+    <text class="end" x="${last.x + 4}" y="${last.y - 10}" text-anchor="end">${pts.at(-1).v}</text>
+    <text x="${L}" y="${H - 4}">${shortDate(pts[0].date)}</text>
+    ${span ? `<text x="${W - R}" y="${H - 4}" text-anchor="end">${shortDate(pts.at(-1).date)}</text>` : ""}
+  </svg>`;
+}
+
+// Sessions per week, lifting days with Muay Thai stacked on top.
+function weeklyChart(weeks, W) {
+  const H = 170, L = 26, R = 4, T = 10, B = 22, pw = W - L - R, ph = H - T - B, base = T + ph;
+  const max = Math.max(1, ...weeks.map((w) => w.lift + w.mt)), step = Math.ceil(max / 4), hi = Math.ceil(max / step) * step;
+  const Y = (v) => base - v / hi * ph, slot = pw / weeks.length, bw = Math.min(24, slot * 0.6);
+  const every = Math.ceil(52 / slot); // label every nth week so labels don't touch
+  // A column segment; only the top one gets 4px rounded corners.
+  const seg = (x, y, h, round) => { const r = round ? Math.min(4, h, bw / 2) : 0;
+    return `M${x},${y + h}V${y + r}Q${x},${y} ${x + r},${y}H${x + bw - r}Q${x + bw},${y} ${x + bw},${y + r}V${y + h}Z`; };
+  let bars = "", labels = "";
+  const pts = weeks.map((w, i) => {
+    const cx = L + slot * (i + 0.5), x = cx - bw / 2, h1 = w.lift / hi * ph, h2 = w.mt / hi * ph;
+    if (h1) bars += `<path d="${seg(x, base - h1, h1, !h2)}" fill="var(--s1)"/>`;
+    if (h2) bars += `<path d="${seg(x, base - h1 - h2, h2 - (h1 ? 2 : 0), true)}" fill="var(--s2)"/>`; // 2px gap between segments
+    if (i % every === 0) labels += `<text x="${cx}" y="${H - 4}" text-anchor="middle">${shortDate(w.start)}</text>`;
+    return { x: cx, tip: `Week of ${shortDate(w.start)}<br>Lifting: ${w.lift} · Muay Thai: ${w.mt}` };
+  });
+  charts.push({ kind: "bar", pts, slot, top: T, bottom: base });
+  const ticks = []; for (let v = 0; v <= hi; v += step) ticks.push(v);
+  return `<svg class="chart" data-c="${charts.length - 1}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Sessions per week">
+    ${ticks.map((t) => `<line class="grid" x1="${L}" x2="${W - R}" y1="${Y(t)}" y2="${Y(t)}"/><text x="${L - 6}" y="${Y(t) + 4}" text-anchor="end">${t}</text>`).join("")}
+    <g class="hl"></g>${bars}${labels}
+  </svg>`;
+}
+
+function renderTrends() {
+  charts = [];
+  const lifts = data.log.filter((e) => e.weight !== undefined).sort((a, b) => a.date.localeCompare(b.date));
+  // Every day from the start of tracking, with Muay Thai counted the same way the log does.
+  const weeks = [];
+  for (const d = sow(parse(START)); iso(d) <= todayStr; d.setDate(d.getDate() + 1)) {
+    const s = iso(d);
+    if (d.getDay() === 0) weeks.push({ start: s, lift: 0, mt: 0 });
+    if (s < START || s > todayStr) continue;
+    const w = weeks.at(-1), entries = logFor(s);
+    if (entries.some((e) => e.weight !== undefined)) w.lift++;
+    w.mt += entries.filter((e) => isAuto(e.name)).length;
+  }
+  const liftDays = weeks.reduce((n, w) => n + w.lift, 0), mt = weeks.reduce((n, w) => n + w.mt, 0);
+  const sets = lifts.reduce((n, e) => n + e.sets.filter(Boolean).length, 0);
+
+  // Sessions per exercise, one per date (the last logged that day wins).
+  const byName = {};
+  for (const e of lifts) (byName[e.name] = byName[e.name] || {})[e.date] = e;
+  let bests = 0;
+  const exercises = Object.entries(byName).map(([name, days]) => {
+    const sessions = Object.values(days);
+    let m = trendMetric, fallback = false;
+    if (sessions.every((s) => metricOf(s, m) === null)) { m = "reps"; fallback = trendMetric !== "reps"; }
+    const pts = sessions.filter((s) => metricOf(s, m) !== null).map((s) => ({ date: s.date, v: metricOf(s, m),
+      tip: `${shortDate(s.date)}: ${esc(fmtMetric(metricOf(s, m), m))}<br>${esc(detail(s))}` }));
+    // New bests: sessions that beat every earlier one on Est. 1RM (or reps without a weight).
+    let top = -1;
+    sessions.forEach((s, i) => { const v = metricOf(s, "e1rm") ?? metricOf(s, "reps") ?? 0; if (i && v > top) bests++; top = Math.max(top, v); });
+    return { name, sessions, pts, m, fallback, last: sessions.at(-1).date };
+  }).sort((a, b) => b.last.localeCompare(a.last) || a.name.localeCompare(b.name));
+
+  const tile = (label, val) => `<div class="card tile"><div class="sub">${label}</div><div class="val">${val}</div></div>`;
+  let html = `<div class="row"><div class="date" style="flex:1">Since ${fmt(START, { month: "short", day: "numeric", year: "numeric" })}</div></div>
+    <div class="tiles">${tile("Lifting days", liftDays)}${tile("Muay Thai sessions", mt)}${tile("Sets logged", sets)}${tile("New bests", bests)}</div>
+    <div class="card wide">
+      <div class="row"><div class="name" style="flex:1">Sessions per week</div>
+        <div class="legend"><span><i style="background:var(--s1)"></i>Lifting</span><span><i style="background:var(--s2)"></i>Muay Thai</span></div></div>
+      ${weeklyChart(weeks, chartWidth())}
+      <details><summary>Table</summary><table><tr><th>Week of</th><th>Lifting days</th><th>Muay Thai</th></tr>
+        ${weeks.map((w) => `<tr><td>${shortDate(w.start)}</td><td>${w.lift}</td><td>${w.mt}</td></tr>`).join("")}</table></details>
+    </div>
+    <div class="row"><div class="section" style="flex:1;margin:0">Exercises</div>
+      <div class="seg">${Object.entries(METRICS).map(([k, v]) => `<button data-act="metric" data-m="${k}" class="${k === trendMetric ? "on" : ""}">${v}</button>`).join("")}</div></div>`;
+  if (!exercises.length) return html + `<div class="empty">Check off some exercises and their history shows up here.</div>`;
+
+  const W = chartWidth(340);
+  html += exercises.map((x) => {
+    const first = x.pts[0], last = x.pts.at(-1), diff = +(last.v - first.v).toFixed(2);
+    const delta = x.pts.length > 1 ? `<span class="delta ${diff > 0 ? "up" : ""}">${diff > 0 ? "▲ +" : diff < 0 ? "▼ " : ""}${diff ? fmtMetric(diff, x.m) : "No change"}</span>` : "";
+    return `<div class="card">
+      <div class="row"><div class="name" style="flex:1">${esc(x.name)}</div>${delta}</div>
+      <div class="sub">${x.fallback ? "Best set (bodyweight)" : METRICS[x.m]}${x.m === "weight" ? " per side" : ""} · ${x.sessions.length} session${x.sessions.length > 1 ? "s" : ""}${x.pts.length > 1 ? ` · since ${shortDate(first.date)}` : ""}</div>
+      ${lineChart(x.pts, W)}
+      <details><summary>Sessions</summary><table><tr><th>Date</th><th>Weight</th><th>Reps</th><th>${METRICS[x.m]}</th></tr>
+        ${x.sessions.slice().reverse().map((s) => `<tr><td>${shortDate(s.date)}</td><td>${esc(s.weight)}</td><td>${esc(s.sets.filter(Boolean).join(", "))}</td><td>${metricOf(s, x.m) ?? "–"}</td></tr>`).join("")}</table></details>
+    </div>`;
+  }).join("");
+  return html;
+}
+
+// Chart hover (and tap): nearest point gets a crosshair or column highlight plus a tooltip.
+function chartHover(e) {
+  const svg = e.target.closest?.("svg[data-c]"), tip = $("#tip");
+  document.querySelectorAll(".chart .hl").forEach((g) => (g.innerHTML = ""));
+  if (!svg) return (tip.hidden = true);
+  const c = charts[+svg.dataset.c], p = new DOMPoint(e.clientX, e.clientY).matrixTransform(svg.getScreenCTM().inverse());
+  const pt = c.pts.reduce((a, b) => (Math.abs(b.x - p.x) < Math.abs(a.x - p.x) ? b : a));
+  svg.querySelector(".hl").innerHTML = c.kind === "bar"
+    ? `<rect x="${pt.x - c.slot / 2}" y="${c.top}" width="${c.slot}" height="${c.bottom - c.top}" rx="4"/>`
+    : `<line x1="${pt.x}" x2="${pt.x}" y1="${c.top}" y2="${c.bottom}"/>`;
+  tip.innerHTML = pt.tip;
+  tip.hidden = false;
+  tip.style.left = Math.min(e.clientX + 14, innerWidth - tip.offsetWidth - 8) + "px";
+  tip.style.top = (e.clientY + 14) + "px";
+}
+$("#main").addEventListener("pointermove", chartHover);
+$("#main").addEventListener("pointerdown", chartHover);
+$("#main").addEventListener("pointerleave", chartHover);
+let resizeTimer;
+addEventListener("resize", () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => view === "trends" && render(), 150); });
 
 const listOf = (card) => card.dataset.x ? data.extras[card.dataset.x] : exsOf(+card.dataset.t, card.dataset.w);
 function valuesFor(card) {
@@ -517,6 +752,7 @@ $("#main").addEventListener("click", (e) => {
     save(); return render();
   }
   if (act === "cal") { calSel = b.dataset.date; return render(); }
+  if (act === "metric") { trendMetric = b.dataset.m; return render(); }
   if (act === "week") { data.week = b.dataset.w; data.weekAnchor = iso(weekStart()); save(); return render(); }
   if (act === "month") {
     const next = new Date(calMonth.getFullYear(), calMonth.getMonth() + +b.dataset.d, 1);

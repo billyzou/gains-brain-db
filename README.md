@@ -2,7 +2,7 @@
 
 # Gains Brain
 
-A small mobile web app for tracking my workout plan, weights, and reps. It reads workout moves from Google Calendar.
+A small web app for tracking my workout plan, weights, and reps. It reads workout moves from Google Calendar. On a phone it's a single column with tabs at the bottom; on a wider screen the tabs and week move to a sidebar and cards sit in columns. The Trends tab charts each exercise over time.
 
 <p align="center">
   <img src="docs/screenshots/today.png" width="260" alt="A workout day with weight and reps for each exercise">
