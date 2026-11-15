@@ -401,23 +401,25 @@ function repsHint(ex, last, j) {
 
 // Weight, reps-per-set and "Last" lines shared by planned and one-off exercise cards.
 // `aside` goes at the right end of the "Reps per set" line (used for one-off cards' Remove button).
-// Total weight for one rep, from the per-side number: trap bar 2×+55, incline bench press 2×
-// (dumbbells), other bench presses 2×+45, Bulgarian split squats 1×+10, pull-ups none
-// (bodyweight), everything else 2×+10.
+// Total weight for one rep on a date, from the per-side number: trap bar 2×+55, incline bench
+// press 2× (dumbbells) from INCLINE_DUMBBELLS_FROM and 2×+45 before, other bench presses 2×+45,
+// Bulgarian split squats 1×+10, pull-ups none (bodyweight), everything else 2×+10.
 // Blank for non-numbers like "L3".
-function totalLb(name, weight) {
+const INCLINE_DUMBBELLS_FROM = "2026-11-04"; // incline bench switched from barbell to dumbbells
+function totalLb(name, weight, date) {
   const n = parseFloat(weight);
   if (isNaN(n) || /pull-?ups?/i.test(name)) return null;
-  const add = /trap bar/i.test(name) ? 55 : /incline bench press/i.test(name) ? 0 : /bench press/i.test(name) ? 45 : 10;
+  const add = /trap bar/i.test(name) ? 55 : /incline bench press/i.test(name) && date >= INCLINE_DUMBBELLS_FROM ? 0
+    : /bench press/i.test(name) ? 45 : 10;
   const sides = /bulgarian split squat/i.test(name) ? 1 : 2;
   return +(sides * n + add).toFixed(2);
 }
-const totalText = (name, weight) => { const t = totalLb(name, weight); return t === null ? "" : `Total ${t} lb`; };
+const totalText = (name, weight, date) => { const t = totalLb(name, weight, date); return t === null ? "" : `Total ${t} lb`; };
 
 function exBody(ex, date, aside = "") {
   const p = ex.name && prevEntry(ex.name, date);
   return `<div class="row" style="margin:12px 0 6px"><div class="label" style="margin:0;flex:1">Weight per side</div>
-      <span class="total">${totalText(ex.name, ex.weight)}</span></div>
+      <span class="total">${totalText(ex.name, ex.weight, date)}</span></div>
     <div class="row weight">
       <button class="step" data-step="-2.5">−</button>
       <input data-f="weight" value="${esc(ex.weight)}" inputmode="decimal">
@@ -561,7 +563,7 @@ const bestSet = (e) => Math.max(0, ...(e.sets || []).map(parseFloat).filter((n) 
 function metricOf(e, m) {
   const r = bestSet(e);
   if (m === "reps") return r || null;
-  const t = totalLb(e.name, e.weight);
+  const t = totalLb(e.name, e.weight, e.date);
   if (m === "weight") return t || null;
   if (m === "volume") {
     const reps = (e.sets || []).map(parseFloat).filter((n) => !isNaN(n)).reduce((a, b) => a + b, 0);
@@ -746,7 +748,7 @@ function onEdit(e) {
 }
 function updateTotal(card) {
   const el = card.querySelector(".total");
-  if (el) el.textContent = totalText(listOf(card)[+card.dataset.i].name, card.querySelector("input[data-f=weight]").value);
+  if (el) el.textContent = totalText(listOf(card)[+card.dataset.i].name, card.querySelector("input[data-f=weight]").value, card.dataset.x || curDate());
 }
 $("#main").addEventListener("input", onEdit);
 $("#main").addEventListener("change", (e) => { if (e.target.tagName === "SELECT") onEdit(e); });
