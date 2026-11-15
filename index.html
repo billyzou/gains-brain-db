@@ -542,7 +542,7 @@ function plannedSection(date) {
 // (see totalLb): Weight is that total, Est. 1RM is total × (1 + best-set reps / 30), and
 // Volume is total × all reps.
 // Exercises with no total (pull-ups, "L3") fall back to best-set reps.
-const METRICS = { e1rm: "Est. 1RM", weight: "Weight", volume: "Volume" };
+const METRICS = { weight: "Weight", volume: "Volume", e1rm: "Est. 1RM" };
 // Main muscle worked, matched on the exercise name in this order (so "Wide Grip Seated Row" is Back,
 // not Forearms). Anything unmatched goes under Other.
 const MUSCLES = [
