@@ -401,13 +401,14 @@ function repsHint(ex, last, j) {
 
 // Weight, reps-per-set and "Last" lines shared by planned and one-off exercise cards.
 // `aside` goes at the right end of the "Reps per set" line (used for one-off cards' Remove button).
-// Total weight for one rep, from the per-side number: trap bar 2×+55, bench presses 2×+45,
-// Bulgarian split squats 1×+10, pull-ups none (bodyweight), everything else 2×+10.
+// Total weight for one rep, from the per-side number: trap bar 2×+55, incline bench press 2×
+// (dumbbells), other bench presses 2×+45, Bulgarian split squats 1×+10, pull-ups none
+// (bodyweight), everything else 2×+10.
 // Blank for non-numbers like "L3".
 function totalLb(name, weight) {
   const n = parseFloat(weight);
   if (isNaN(n) || /pull-?ups?/i.test(name)) return null;
-  const add = /trap bar/i.test(name) ? 55 : /bench press/i.test(name) ? 45 : 10;
+  const add = /trap bar/i.test(name) ? 55 : /incline bench press/i.test(name) ? 0 : /bench press/i.test(name) ? 45 : 10;
   const sides = /bulgarian split squat/i.test(name) ? 1 : 2;
   return +(sides * n + add).toFixed(2);
 }
@@ -554,7 +555,7 @@ const MUSCLES = [
 ];
 const muscleOf = (name) => (MUSCLES.find(([, re]) => re.test(name)) || ["Other"])[0];
 const LABELS = { ...METRICS, weight: "Total", reps: "Best set" }; // session table column headings
-let trendMetric = "e1rm", charts = []; // charts: hover data for each rendered chart, by data-c
+let trendMetric = "weight", charts = []; // charts: hover data for each rendered chart, by data-c
 const shortDate = (s) => fmt(s, { month: "short", day: "numeric" });
 const bestSet = (e) => Math.max(0, ...(e.sets || []).map(parseFloat).filter((n) => !isNaN(n)));
 function metricOf(e, m) {
